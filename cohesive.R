@@ -25,7 +25,7 @@ employees_table %>%
   ) +
   theme_light()
 
-predict_employees <- function(industry, summary = FALSE, assumption = FALSE) {
+predict_employees <- function(industry, summary = TRUE, assumption = TRUE) {
   model <- lm(sqrt(employees) ~ year + Industry, data = employees_table)
   if(summary) {print(summary(model))}
   if(assumption) {print(plot(model))}
@@ -55,7 +55,8 @@ wages_table %>%
     x = "Year",
     y = "Average wages"
   ) +
-  theme_light()
+  theme_light(base_size=14) +
+  theme(legend.position = "bottom")
 
 predict_wage <- function(industry, summary = FALSE, assumptions = FALSE) {
   # input an industry and then output an average wage in 2026
@@ -81,7 +82,8 @@ claims_table %>%
   ggplot(aes(x=year, y=claim_rate, colour = Industry)) +
   geom_line() +
   labs(title = "Claim rates over time by industry") +
-  theme_light()
+  theme_light(base_size=14) +
+  theme(legend.position = "bottom")
 # using a flatline (average of past 3 years) to predict the claims rate
 # the graph seems to suggest that Property and Business Service is decreasing but unsure if this will continue in the future. using the flatline might be overestimating.
 
@@ -117,7 +119,8 @@ costs_table %>%
     x = "Year",
     y = "Average medical costs"
   ) +
-  theme_light()
+  theme_light(base_size = 14) +
+  theme(legend.position = "bottom")
 
 predict_costs <- function(industry) {
   # input an industry and then output an average medical costs per claim in 2026
@@ -174,7 +177,12 @@ predicted_data <- employees_table %>%
   full_join(costs_table) %>% 
   select(Industry, year, employees, avg_wages, claim_rate, avg_costs) %>% 
   ungroup() %>% 
-  add_row(Industry = unique(employees_table$Industry),
+  add_row(Industry = c("Accommodation and Hospitality",
+                       "Government Administration",
+                       "Fishing and Agriculture",
+                       "Education",
+                       "Health and Community",
+                       "Property and Business Service"),
           year = 2026,
           employees = employees_2026,
           avg_wages = avg_wages_2026,
@@ -227,3 +235,8 @@ plot3 <- predicted_data %>%
   theme_light()
 
 plot0 + plot1 + plot2 + plot3 + plot_layout(guides = "collect")
+
+# Find the amount of moneys needed ----
+total_medical_costs <- (claim_rate_2026 * employees_2026 * avg_costs_2026) %>% sum()
+total_salary_compensation <- (0.7 * 4/52 * claim_rate_2026 * employees_2026 * avg_wages_2026) %>% sum()
+total_costs <- total_medical_costs + total_salary_compensation + 2400000

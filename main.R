@@ -47,7 +47,7 @@ avg_wage_plot <- ggplot(prepped_data, aes(x = year, y = avg_wage)) +
   facet_wrap(~Industry, labeller = labeller(Industry = function(x) {
     paste0(x, "\n(Number of Companies: ", company_counts$n_companies[match(x, company_counts$Industry)], ")")
   })) +
-  theme_light()
+  theme_light(base_size=14)
 avg_wage_plot
 # looks like regression split by industry will be appropriate. fairly linear trends and in relatively close bands amongst each industry. No huge outliers anywhere
 
@@ -70,15 +70,15 @@ employees_plot <- prepped_data %>%
   geom_line(aes(group = `Company ID`)) +
   geom_point(aes(group = `Company ID`)) +
   labs(
-    title = "Employees over time by company",
+    title = "Sqrt(Employees) over time by company",
     x = "Year",
     y = "Sqrt(No. of employees)"
   ) +
   stat_smooth(method = "lm", formula = y ~ x ) +
-  facet_wrap(~Industry, labeller = labeller(Industry = function(x) {
+  facet_wrap(~Industry, scales = "free_y", labeller = labeller(Industry = function(x) {
     paste0(x, "\n(Number of Companies: ", company_counts$n_companies[match(x, company_counts$Industry)], ")")
   })) +
-  theme_light()
+  theme_light(base_size = 14)
 employees_plot  
 
 
@@ -109,7 +109,7 @@ claim_rate_plot <- full_join(claims_table, employees_table) %>% # a plot by indi
   facet_wrap(~Industry, scales = "free_y", labeller = labeller(Industry = function(x) {
     paste0(x, "\n(Number of Companies: ", company_counts$n_companies[match(x, company_counts$Industry)], ")")
   })) +
-  theme_light()
+  theme_light(base_size=14)
 claim_rate_plot
 # to illustrate that it is basically all small companies, lets remove all companies with less than 100 employees (the 1st decile is 101 employees)
 claim_rate_plot_no_small_businesses <- filter(full_join(claims_table, employees_table), employees >= 100) %>% 
