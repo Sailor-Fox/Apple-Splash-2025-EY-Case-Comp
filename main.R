@@ -28,7 +28,9 @@ employees_table <- data %>%
   mutate(year = as.numeric(year))
 
 prepped_data <- full_join(wage_table, cost_table) %>%
-  full_join(employees_table)
+  full_join(employees_table) %>% 
+  mutate(percentile = if_else(avg_cost > quantile(avg_cost, 0.95), TRUE, FALSE),
+         fish = if_else(Industry == "Fishing and Agriculture", "F&G industry", "Others"))
 
 # make a quick visualisation
 company_counts <- prepped_data %>%
@@ -51,7 +53,7 @@ avg_wage_plot <- ggplot(prepped_data, aes(x = year, y = avg_wage)) +
 avg_wage_plot
 # looks like regression split by industry will be appropriate. fairly linear trends and in relatively close bands amongst each industry. No huge outliers anywhere
 
-avg_cost_plot <- ggplot(prepped_data, aes(x = year, y = avg_cost)) +
+avg_cost_plot <- ggplot(prepped_data, aes(x = year, y = avg_cost, colour = percentile)) +
   geom_line(aes(group = `Company ID`)) +
   geom_point(aes(group = `Company ID`)) +
   labs(
@@ -59,9 +61,8 @@ avg_cost_plot <- ggplot(prepped_data, aes(x = year, y = avg_cost)) +
     x = "Year",
     y = "Average costs"
   ) +
-  facet_wrap(~Industry, scale = "free_y") +
-  theme_light() +
-  geom_smooth(method = "lm")
+  facet_wrap(~fish) +
+  theme_light(base_size=14)
 avg_cost_plot
 # possibly don't want to split these by industry, they seem similar cost no matter the industry. occasional large outliers indicating regression may be a poor choice. possibly just use a flat line model and then incorporate occasional outliers at a much higher cost (also fishing and agriculture has lots of incidents it seems)
 

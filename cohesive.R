@@ -15,15 +15,16 @@ employees_table <- data %>%
 # idk if we want the graph of the straight employees or the sqrt() - thats what the regression was fitted on
 # prolly put employees in main slides and sqrt(employees) in the appendix
 employees_table %>% 
-  ggplot(aes(x = year, y = sqrt(employees), colour = Industry)) +
+  ggplot(aes(x = year, y = employees, colour = Industry)) +
   geom_line() +
   geom_point() +
   labs(
-    title = "sqrt(Employees) over time by industry",
+    title = "Employees over time by industry",
     x = "Year",
-    y = "Sqrt(No. of employees)"
+    y = "No. of employees"
   ) +
-  theme_light()
+  theme_light(base_size=14) +
+  theme(legend.position = "bottom")
 
 predict_employees <- function(industry, summary = TRUE, assumption = TRUE) {
   model <- lm(sqrt(employees) ~ year + Industry, data = employees_table)
@@ -238,5 +239,6 @@ plot0 + plot1 + plot2 + plot3 + plot_layout(guides = "collect")
 
 # Find the amount of moneys needed ----
 total_medical_costs <- (claim_rate_2026 * employees_2026 * avg_costs_2026) %>% sum()
-total_salary_compensation <- (0.7 * 4/52 * claim_rate_2026 * employees_2026 * avg_wages_2026) %>% sum()
+total_salary_compensation <- (0.7 * 4/52 * claim_rate_2026 * employees_2026 * avg_wages_2026) %>% sum()*0.75
 total_costs <- total_medical_costs + total_salary_compensation + 2400000
+
