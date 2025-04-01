@@ -251,6 +251,6 @@ plot0 + plot1 + plot2 + plot3 + plot_layout(guides = "collect")
 
 # Find the amount of moneys needed ----
 total_medical_costs <- (claim_rate_2026 * employees_2026 * avg_costs_2026) %>% sum()
-total_salary_compensation <- (0.7 * 4/52 * claim_rate_2026 * employees_2026 * avg_wages_2026) %>% sum()*0.75
+total_salary_compensation <- (0.7 * 0.75 * 4/52 * claim_rate_2026 * employees_2026 * avg_wages_2026) %>% sum()
 total_costs <- total_medical_costs + total_salary_compensation + 2400000
 

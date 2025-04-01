@@ -2,7 +2,7 @@ library(fitdistrplus)
 library(tidyverse)
 library(readxl)
 data <- read_excel("2025 Case Comp Data CLEAN.xlsx")
-# making claims cost be per claim ----
+
 employees_table_company <- data %>% 
   dplyr::select(`Company ID`, Industry, `2023` = `Number of employees 2023`, `2024` = `Number of employees 2024`, `2025` = `Number of employees 2025`) %>% 
   pivot_longer(cols = 3:5, names_to = "year", values_to = "employees") %>%
@@ -20,20 +20,72 @@ costs_table_company <- data %>%
   pivot_longer(cols = 3:5, names_to = "year", values_to = "costs") %>%
   mutate(year = as.numeric(year)) %>% 
   full_join(claims_table_company) %>% 
-  mutate(avg_costs = costs / claims) %>% 
+  mutate(avg_costs = costs / employees) %>% 
   dplyr::select(`Company ID`, Industry, year, costs, claims, avg_costs)
 
-by_company_graphs <- function(industry) {
-  industry_data <- costs_table_company %>% 
-    filter(Industry == industry)
-  fit.in <- fitdist(log(industry_data$avg_costs), "weibull")
-  
-  par(mfrow = c(2,2))
-  denscomp(fit.in)
-  qqcomp(fit.in)
-  cdfcomp(fit.in)
-  ppcomp(fit.in)
+costs_table_company_fish <- costs_table_company %>% 
+  filter(Industry == "Fishing and Agriculture") %>% 
+  mutate(outlier = if_else(avg_costs > 1.5*IQR(avg_costs)+quantile(avg_costs, 0.75), TRUE, FALSE))
+
+freq_func <- function(industry) {
+  costs_table_company %>% 
+    filter(Industry == industry) %>% 
+    mutate(outlier = if_else(avg_costs > 1.5*IQR(avg_costs)+quantile(avg_costs, 0.75), TRUE, FALSE)) %>% 
+    pull(outlier) %>% 
+    table()
 }
+
+costs_table_company_others <- costs_table_company %>% 
+  filter(Industry != "Fishing and Agriculture") %>% 
+  mutate(outlier = if_else(avg_costs > 1.5*IQR(avg_costs)+quantile(avg_costs, 0.75), TRUE, FALSE))
+
+fit_dist <- function(industry, outlierblah) {
+  industry_data <- costs_table_company_fish %>% 
+    filter(outlier == outlierblah)
+  fit.in <- fitdist(log(industry_data$costs), "norm")
+  print(exp(fit.in$estimate))
+  
+  # par(mfrow = c(2,2))
+  # denscomp(fit.in)
+  # qqcomp(fit.in)
+  # cdfcomp(fit.in)
+  # ppcomp(fit.in)
+}
+
+costs_table_company_fish %>%
+  filter(!outlier) %>% 
+  ggplot(aes(x = year, y = avg_costs, group = `Company ID`)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Non-outliers for fishing and agriculture") +
+  theme_light()
+
+costs_table_company_fish %>%
+  filter(!outlier) %>% 
+  ggplot(aes(x = year, y = avg_costs, group = `Company ID`)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Outliers for fishing and agriculture") +
+  theme_light()
+
+costs_table_company_others %>%
+  filter(!outlier) %>% 
+  ggplot(aes(x = year, y = avg_costs, group = `Company ID`)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Non-outliers for others") +
+  theme_light()
+
+costs_table_company_others %>%
+  filter(outlier) %>% 
+  ggplot(aes(x = year, y = avg_costs, group = `Company ID`)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Outliers for others") +
+  theme_light()
+
+
+costs_table_company %>% view()
 
 # original (claims cost is per company over a year) ----
 byindustrygraphs <- function(industry) {
@@ -89,3 +141,6 @@ costs_table_company %>% filter(Industry == "Fishing and Agriculture") %>% pull(c
 
 # Estimated Wages Paid in 2026
 avg_wages_2026*employees_2026
+
+
+
