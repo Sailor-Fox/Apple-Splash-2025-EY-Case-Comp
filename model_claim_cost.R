@@ -57,37 +57,37 @@ avg_costs_table %>%
 f_and_g <- avg_costs_table %>% 
   dplyr::filter(industry_group == "Fishing and Agriculture")
 dplyr::count(f_and_g, outlier == TRUE) # 11/142 are outliers
-fg_outlier_rate <- 11/142
+fg_outlier_rate <- 11/(142+11)
 
 # now deal with the rest
 others <- avg_costs_table %>% 
   dplyr::filter(industry_group == "Other industries")
 dplyr::count(others, outlier == TRUE) # 18/435 are outliers
-others_outlier_rate <- 18/435
+others_outlier_rate <- 18/(435+18)
 
 # combine for final prediction
 predict_cost <- function(industry) {
   if (industry == "Fishing and Agriculture") {
     fg_outlier_predict <- f_and_g %>% 
       dplyr::filter(outlier == TRUE) %>% 
-      pull(avg_costs) %>% 
-      mean()
+      dplyr::pull(avg_costs) %>% 
+      base::mean()
     fg_standard_predict <- f_and_g %>% 
       dplyr::filter(outlier == FALSE) %>% 
-      pull(avg_costs) %>% 
-      mean()
+      dplyr::pull(avg_costs) %>% 
+      base::mean()
     return (fg_outlier_rate * fg_outlier_predict + (1 - fg_outlier_rate) * fg_standard_predict)
   } else {
     others_outlier_predict <- avg_costs_table %>% 
       dplyr::filter(industry_group == "Other industries",
                     outlier == TRUE) %>% 
-      pull(avg_costs) %>% 
-      mean()
+      dplyr::pull(avg_costs) %>% 
+      base::mean()
     others_standard_predict <- avg_costs_table %>% 
       dplyr::filter(industry_group == "Other industries",
                     outlier == FALSE) %>% 
-      pull(avg_costs) %>% 
-      mean()
+      dplyr::pull(avg_costs) %>% 
+      base::mean()
     return (others_outlier_rate * others_outlier_predict + (1 - others_outlier_rate) * others_standard_predict)
   }
 }

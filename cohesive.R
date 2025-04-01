@@ -6,7 +6,7 @@ data <- read_excel("2025 Case Comp Data CLEAN.xlsx")
 
 # Workforce size by industry ----
 employees_table <- data %>% 
-  select(`Company ID`, Industry, `2023` = `Number of employees 2023`, `2024` = `Number of employees 2024`, `2025` = `Number of employees 2025`) %>% 
+  dplyr::select(`Company ID`, Industry, `2023` = `Number of employees 2023`, `2024` = `Number of employees 2024`, `2025` = `Number of employees 2025`) %>% 
   pivot_longer(cols = 3:5, names_to = "year", values_to = "employees") %>%
   mutate(year = as.numeric(year)) %>% 
   group_by(Industry, year) %>% 
@@ -26,7 +26,19 @@ employees_table %>%
   theme_light(base_size=14) +
   theme(legend.position = "bottom")
 
-predict_employees <- function(industry, summary = TRUE, assumption = TRUE) {
+employees_table %>% 
+  ggplot(aes(x = year, y = sqrt(employees), colour = Industry)) +
+  geom_line() +
+  geom_point() +
+  labs(
+    title = "Sqrt(Employees) over time by industry",
+    x = "Year",
+    y = "Sqrt(No. of employees)"
+  ) +
+  theme_light(base_size=14) +
+  theme(legend.position = "bottom")
+
+predict_employees <- function(industry, summary = FALSE, assumption = FALSE) {
   model <- lm(sqrt(employees) ~ year + Industry, data = employees_table)
   if(summary) {print(summary(model))}
   if(assumption) {print(plot(model))}
@@ -100,7 +112,7 @@ predict_claim_rate <- function(industry) {
 
 # NOT COMPLETE AND DODGY RN Average medical cost per claim by industry ----
   # possibly using survival analysis technique? like KME or whatever
-costs_table <- data %>% 
+costs_table <- data %>%
   select(Industry, `Company ID`, `2023` = `2023 medical costs`, `2024` = `2024 medical costs`, `2025` = `2025 medical costs`) %>% 
   pivot_longer(cols = 3:5, names_to = "year", values_to = "costs") %>%
   mutate(year = as.numeric(year)) %>% 
