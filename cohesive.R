@@ -207,7 +207,7 @@ plot0 <- predicted_data %>%
   geom_line() +
   geom_point() + 
   labs(
-    title = "Employees over time by industry",
+    title = "Employees over time",
     x = "Year",
     y = "Employees"   
   ) +
@@ -218,9 +218,9 @@ plot1 <- predicted_data %>%
   geom_line() +
   geom_point() + 
   labs(
-    title = "avg_wages over time by industry",
+    title = "Average wages over time",
     x = "Year",
-    y = "avg_wages"   
+    y = "Average wage"   
   ) +
   theme_light()
 
@@ -229,9 +229,9 @@ plot2 <- predicted_data %>%
   geom_line() +
   geom_point() + 
   labs(
-    title = "claim_rate over time by industry",
+    title = "Claim rate",
     x = "Year",
-    y = "claim_rate"   
+    y = "Claim rate"   
   ) +
   theme_light()
 
@@ -250,7 +250,8 @@ plot3 <- predicted_data %>%
 plot0 + plot1 + plot2 + plot3 + plot_layout(guides = "collect")
 
 # Find the amount of moneys needed ----
-total_medical_costs <- (claim_rate_2026 * employees_2026 * avg_costs_2026) %>% sum()
+# total_medical_costs <- (claim_rate_2026 * employees_2026 * avg_costs_2026) %>% sum()
 total_salary_compensation <- (0.7 * 0.75 * 4/52 * claim_rate_2026 * employees_2026 * avg_wages_2026) %>% sum()
 total_costs <- total_medical_costs + total_salary_compensation + 2400000
+
 

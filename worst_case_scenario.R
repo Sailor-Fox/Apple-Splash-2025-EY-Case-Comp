@@ -78,15 +78,38 @@ tibble(industry = unique(data$Industry),
   pivot_longer(cols = c(Operating, Wages, Medical), 
                names_to = "cost_type", 
                values_to = "amount") %>% 
+  mutate(cost_type = factor(cost_type, levels = c("Operating", "Wages", "Medical"))) %>% 
   ggplot(aes(x = industry, y = amount, fill = cost_type)) +
   geom_col() +
-  labs(title = "Stacked Column Chart of Costs by Industry",
+  labs(title = "Breakdown of Costs by Industry",
        x = "Industry",
        y = "Amount",
        fill = "Cost Type") +
   theme_light(base_size=14) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
+tibble(
+  industry = unique(data$Industry),
+  Medical = medical,
+  Wages = wages,
+  Operating = employees_2026 / sum(employees_2026) * 2400000
+) %>% 
+  pivot_longer(cols = c(Operating, Wages, Medical), 
+               names_to = "cost_type", 
+               values_to = "amount") %>% 
+  group_by(industry) %>% 
+  mutate(proportion = amount / sum(amount)) %>%  # Convert to proportion
+  ungroup() %>% 
+  mutate(cost_type = factor(cost_type, levels = c("Operating", "Wages", "Medical"))) %>%   # Set order
+  ggplot(aes(x = industry, y = proportion, fill = cost_type)) +
+    geom_col() +  # Position fill makes each column sum to 1
+    scale_y_continuous(labels = scales::percent_format()) +  # Format as percentage
+    labs(title = "Proportional Breakdown of Costs by Industry",
+         x = "Industry",
+         y = "Proportion",
+         fill = "Cost Type") +
+    theme_light(base_size = 14) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 ### ---- WORST CASE SCENARIO ----
 alpha <- 0.99
